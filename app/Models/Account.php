@@ -13,5 +13,16 @@ use Illuminate\Database\Eloquent\Model;
 #[Cast('code', 'integer')]
 class Account extends Model
 {
+    public function journalEntries(): HasMany
+    {
+        return $this->hasMany(JournalEntry::class);
+    }
 
+    public function transactions()
+    {
+        return $this->hasManyThrough(
+            Transaction::class,
+            JournalEntry::class
+        );
+    }
 }
