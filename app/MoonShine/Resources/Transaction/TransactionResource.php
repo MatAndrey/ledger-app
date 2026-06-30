@@ -32,7 +32,6 @@ class TransactionResource extends ModelResource implements HasImportExportContra
 
     protected string $title = 'Транзакции';
 
-    protected bool $withPolicy = true;
     protected ?PageType $redirectAfterSave = PageType::DETAIL;
     
     /**
