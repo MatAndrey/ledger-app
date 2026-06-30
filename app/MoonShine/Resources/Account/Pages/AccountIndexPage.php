@@ -38,6 +38,7 @@ class AccountIndexPage extends IndexPage
             Text::make('Название', 'name')->sortable(),
             Number::make('Код', 'code')->sortable(),
             Enum::make('Тип', 'type')->attach(AccountTypes::class)->sortable(),
+            Text::make('Остаток', 'balance'),
             Checkbox::make('Активен', 'is_active')->sortable(),
         ];
     }
