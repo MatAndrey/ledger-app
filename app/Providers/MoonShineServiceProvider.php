@@ -13,6 +13,7 @@ use App\MoonShine\Resources\MoonShineUserRole\MoonShineUserRoleResource;
 use App\MoonShine\Resources\Account\AccountResource;
 use App\MoonShine\Resources\Transaction\TransactionResource;
 use App\MoonShine\Resources\JournalEntry\JournalEntryResource;
+use App\MoonShine\Pages\TrialBalance;
 
 class MoonShineServiceProvider extends ServiceProvider
 {
@@ -31,6 +32,7 @@ class MoonShineServiceProvider extends ServiceProvider
             ])
             ->pages([
                 ...$core->getConfig()->getPages(),
+                TrialBalance::class,
             ])
         ;
     }

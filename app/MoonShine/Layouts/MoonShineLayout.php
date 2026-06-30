@@ -13,6 +13,7 @@ use App\MoonShine\Resources\Account\AccountResource;
 use MoonShine\MenuManager\MenuItem;
 use App\MoonShine\Resources\Transaction\TransactionResource;
 use App\MoonShine\Resources\JournalEntry\JournalEntryResource;
+use App\MoonShine\Pages\TrialBalance;
 
 final class MoonShineLayout extends AppLayout
 {
@@ -33,7 +34,8 @@ final class MoonShineLayout extends AppLayout
         return [
             ...parent::menu(),
             MenuItem::make(AccountResource::class, 'Счета'),
-            MenuItem::make(TransactionResource::class, 'Транзакции')
+            MenuItem::make(TransactionResource::class, 'Транзакции'),
+            MenuItem::make(TrialBalance::class, 'ОСВ')
         ];
     }
 

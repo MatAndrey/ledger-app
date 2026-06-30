@@ -43,7 +43,7 @@ class TransactionFormPage extends FormPage
             RelationRepeater::make('Проводки', 'journalEntries', resource: JournalEntryResource::class)
                 ->fields([
                     Select::make('Счёт', 'account_id')
-                        ->options(Account::pluck('name', 'id')->toArray())
+                        ->options(Account::where('is_active', true)->pluck('name', 'id')->toArray())
                         ->required()
                         ->searchable(),
                     Number::make('Сумма', 'amount')
@@ -55,7 +55,7 @@ class TransactionFormPage extends FormPage
                         ->required()
                 ])
                 ->creatable()
-                ->removable()
+                ->removable(),
         ];
     }
 
@@ -86,9 +86,17 @@ class TransactionFormPage extends FormPage
                     $fail("Сумма дебета ($totalDebit) должна равняться сумме кредита ($totalCredit)");
                 }
             }],
-            'journalEntries.*.account_id' => ['required', 'exists:accounts,id'],
             'journalEntries.*.type' => ['required', 'in:debit,credit'],
-            'journalEntries.*.amount' => ['required', 'numeric', 'min:0.01']
+            'journalEntries.*.amount' => ['required', 'numeric', 'min:0.01'],
+            'journalEntries.*.account_id' => [
+                'required',
+                function (string $attribute, mixed $value, \Closure $fail) {
+                    $account = Account::find($value);
+                    if (!$account || !$account->is_active) {
+                        $fail("Выбранный счёт ($account[name]) неактивен.");
+                    }
+                },
+            ],
         ];
     }
 

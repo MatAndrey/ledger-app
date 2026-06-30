@@ -1,0 +1,92 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\MoonShine\Pages;
+
+use MoonShine\Laravel\Pages\Page;
+use MoonShine\UI\Components\Layout\Grid;
+use MoonShine\UI\Components\Layout\Column;
+use MoonShine\UI\Components\FormBuilder;
+use MoonShine\UI\Fields\Date;
+use MoonShine\UI\Components\Table\TableBuilder;
+use MoonShine\UI\Fields\Text;
+use MoonShine\UI\Fields\Enum;
+use MoonShine\UI\Components\ActionButton;
+use App\Services\LedgerService;
+use Illuminate\Http\Request;
+use Carbon\Carbon;
+use MoonShine\Support\Enums\FormMethod;
+use App\Enums\AccountTypes;
+
+
+class TrialBalance extends Page
+{
+    /**
+     * @return array<string, string>
+     */
+    public function getBreadcrumbs(): array
+    {
+        return [
+            '#' => $this->getTitle()
+        ];
+    }
+
+    public function getTitle(): string
+    {
+        return $this->title ?: 'Оборотно-сальдовая ведомость';
+    }
+
+    /**
+     * @return list<ComponentContract>
+     */
+    protected function components(): iterable
+	{
+		$start = request('start', Carbon::now()->startOfMonth()->toDateString());
+        $end   = request('end', Carbon::now()->endOfMonth()->toDateString());
+
+        $service = app(LedgerService::class);
+        $reportData = $service->generateTrialBalance(
+            Carbon::parse($start),
+            Carbon::parse($end)
+        );
+        
+
+        return [
+            Grid::make([
+                Column::make([
+                    FormBuilder::make()
+                        ->method(FormMethod::GET)
+                        ->fields([
+                            Date::make('Начало периода', 'start')
+                                ->default($start)
+                                ->required(),
+                            Date::make('Конец периода', 'end')
+                                ->default($end)
+                                ->required(),
+                        ])
+                        ->submit('Показать', ['class' => 'btn-primary'])
+                ])->columnSpan(12),
+
+                Column::make([
+                    TableBuilder::make()
+                        ->fields([
+                            Text::make('Код', 'account.code'),
+                            Text::make('Счёт', 'account.name'),
+                            Enum::make('Тип', 'account.type')->attach(AccountTypes::class),
+                            Text::make('Сальдо на начало (Дебет)', 'opening_debit'),
+                            Text::make('Сальдо на начало (Кредит)', 'opening_credit'),
+                            Text::make('Оборот Дебет', 'debit_turnover'),
+                            Text::make('Оборот Кредит', 'credit_turnover'),
+                            Text::make('Сальдо на конец (Дебет)', 'closing_debit'),
+                            Text::make('Сальдо на конец (Кредит)', 'closing_credit'),
+                        ])
+                        ->items($reportData)
+                        ->when(empty($reportData), function ($table) {
+                            $table->withNotFound('Нет данных за выбранный период');
+                        })
+                ])->columnSpan(12),
+            ])
+        ];
+	}
+}
