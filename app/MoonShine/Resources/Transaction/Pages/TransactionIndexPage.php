@@ -15,8 +15,11 @@ use App\MoonShine\Resources\Transaction\TransactionResource;
 use MoonShine\Support\ListOf;
 use MoonShine\UI\Fields\Enum;
 use MoonShine\UI\Fields\Date;
+use MoonShine\UI\Fields\DateRange;
 use MoonShine\UI\Fields\Text;
+use MoonShine\UI\Fields\Select;
 use MoonShine\UI\Components\ActionButton; 
+use App\Models\Account;
 use Throwable;
 
 
@@ -38,9 +41,10 @@ class TransactionIndexPage extends IndexPage
             Date::make('Дата', 'date')
                 ->format('d.m.Y')
                 ->sortable(),
+            Text::make('Сумма', 'total_amount'),
+            Text::make('Счета', 'accounts_list'),
             Text::make('Описание', 'description')
                 ->sortable(),
-            Text::make('Сумма', 'total_amount')
         ];
     }
 
@@ -57,7 +61,20 @@ class TransactionIndexPage extends IndexPage
      */
     protected function filters(): iterable
     {
-        return [];
+        return [
+            DateRange::make('Дата', 'date'),
+            Select::make('Счет', 'account_filter')
+                ->options(Account::pluck('name', 'id')->toArray())
+                ->nullable()
+                ->multiple()
+                ->onApply(function ($query, $value) {
+                    if ($value) {
+                        $query->whereHas('journalEntries', function ($q) use ($value) {
+                            $q->where('account_id', $value);
+                        });
+                    }
+                }),
+        ];
     }
 
     /**

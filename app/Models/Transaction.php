@@ -20,12 +20,22 @@ class Transaction extends Model
         return $this->hasMany(JournalEntry::class);
     }
 
-    protected $appends = ['total_amount'];
-
     public function getTotalAmountAttribute(): float
     {
         return (float) $this->journalEntries()
             ->where('type', \App\Enums\JournalEntryTypes::Debit)
             ->sum('amount');
+    }
+
+    public function accounts()
+    {
+        return $this->belongsToMany(Account::class, 'journal_entries')
+                    ->withPivot('amount', 'type')
+                    ->distinct();
+    }
+
+    public function getAccountsListAttribute(): string
+    {
+        return $this->accounts->pluck('name')->implode(', ');
     }
 }
