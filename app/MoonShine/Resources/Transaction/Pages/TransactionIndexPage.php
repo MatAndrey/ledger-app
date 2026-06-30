@@ -18,6 +18,7 @@ use MoonShine\UI\Fields\Date;
 use MoonShine\UI\Fields\DateRange;
 use MoonShine\UI\Fields\Text;
 use MoonShine\UI\Fields\Select;
+use MoonShine\UI\Fields\Checkbox;
 use MoonShine\UI\Components\ActionButton; 
 use App\Models\Account;
 use Throwable;
@@ -45,6 +46,7 @@ class TransactionIndexPage extends IndexPage
             Text::make('Счета', 'accounts_list'),
             Text::make('Описание', 'description')
                 ->sortable(),
+            Checkbox::make('Проведена', 'is_posted')
         ];
     }
 

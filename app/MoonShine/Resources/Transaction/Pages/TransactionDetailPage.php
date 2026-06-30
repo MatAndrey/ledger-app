@@ -16,6 +16,7 @@ use MoonShine\UI\Fields\ID;
 use MoonShine\UI\Fields\Enum;
 use MoonShine\UI\Fields\Date;
 use MoonShine\UI\Fields\Text;
+use MoonShine\UI\Fields\Checkbox;
 use App\Enums\JournalEntryTypes;
 use Throwable;
 
@@ -40,7 +41,8 @@ class TransactionDetailPage extends DetailPage
                     Text::make('Счёт', 'account_id'),
                     Text::make('Сумма', 'amount'),
                     Enum::make('Тип', 'type')->attach(JournalEntryTypes::class)
-                ])
+                ]),
+            Checkbox::make('Проведена', 'is_posted')
         ];
     }
 

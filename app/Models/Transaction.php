@@ -9,9 +9,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Enums\JournalEntryTypes;
 
-#[Fillable(['date', 'description', 'created_at'])]
+#[Fillable(['date', 'description', 'created_at', 'is_posted'])]
 #[Cast('date', 'date')]
 #[Cast('created_at', 'datetime')]
+#[Cast('is_posted', 'boolean')]
 #[WithoutTimestamps]
 class Transaction extends Model
 {
@@ -30,7 +31,6 @@ class Transaction extends Model
     public function accounts()
     {
         return $this->belongsToMany(Account::class, 'journal_entries')
-                    ->withPivot('amount', 'type')
                     ->distinct();
     }
 

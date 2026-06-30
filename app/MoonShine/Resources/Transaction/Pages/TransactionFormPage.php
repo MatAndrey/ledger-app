@@ -19,6 +19,7 @@ use MoonShine\UI\Fields\Select;
 use MoonShine\UI\Fields\Enum;
 use MoonShine\UI\Fields\Number;
 use MoonShine\UI\Fields\Textarea;
+use MoonShine\UI\Fields\Checkbox;
 use App\MoonShine\Resources\JournalEntry\JournalEntryResource;
 use App\Models\Account;
 use App\Enums\JournalEntryTypes;
@@ -40,6 +41,8 @@ class TransactionFormPage extends FormPage
                 ->required()
                 ->default(now()->toDateString()),
             Textarea::make('Описание', 'description'),
+            Checkbox::make('Проведена', 'is_posted')
+                ->default(true),
             RelationRepeater::make('Проводки', 'journalEntries', resource: JournalEntryResource::class)
                 ->fields([
                     Select::make('Счёт', 'account_id')

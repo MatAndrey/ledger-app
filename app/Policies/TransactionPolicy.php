@@ -29,22 +29,22 @@ class TransactionPolicy
 
     public function update(MoonshineUser $user, Transaction $item): bool
     {
-        return false;
+        return !$item->is_posted;
     }
 
     public function delete(MoonshineUser $user, Transaction $item): bool
     {
-        return false;
+        return !$item->is_posted;
     }
 
     public function restore(MoonshineUser $user, Transaction $item): bool
     {
-        return false;
+        return !$item->is_posted;
     }
 
     public function forceDelete(MoonshineUser $user, Transaction $item): bool
     {
-        return false;
+        return !$item->is_posted;
     }
 
     public function massDelete(MoonshineUser $user): bool

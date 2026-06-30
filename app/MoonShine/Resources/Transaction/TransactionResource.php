@@ -32,7 +32,8 @@ class TransactionResource extends ModelResource implements HasImportExportContra
 
     protected string $title = 'Транзакции';
 
-    protected ?PageType $redirectAfterSave = PageType::DETAIL;
+    protected bool $withPolicy = true;
+    protected ?PageType $redirectAfterSave = PageType::INDEX;
     
     /**
      * @return list<class-string<PageContract>>
