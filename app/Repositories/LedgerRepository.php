@@ -18,7 +18,7 @@ class LedgerRepository
     public function getOpeningBalances(Carbon $date): Collection
     {
         return JournalEntry::whereHas('transaction', function ($q) use ($date) {
-                $q->where('date', '<', $date);
+                $q->where('date', '<', $date)->where('is_posted', true);
             })
             ->select('account_id')
             ->selectRaw('SUM(CASE WHEN type = ? THEN amount ELSE 0 END) as debit_sum', ['debit'])
@@ -30,7 +30,7 @@ class LedgerRepository
     public function getTurnovers(Carbon $start, Carbon $end): Collection
     {
         return JournalEntry::whereHas('transaction', function ($q) use ($start, $end) {
-                $q->whereBetween('date', [$start, $end]);
+                $q->whereBetween('date', [$start, $end])->where('is_posted', true);
             })
             ->select('account_id')
             ->selectRaw('SUM(CASE WHEN type = ? THEN amount ELSE 0 END) as debit_turnover', ['debit'])
