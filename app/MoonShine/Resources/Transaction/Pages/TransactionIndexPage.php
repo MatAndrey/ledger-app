@@ -137,12 +137,4 @@ class TransactionIndexPage extends IndexPage
             ...parent::bottomLayer()
         ];
     }
-
-    protected function topRightButtons(): ListOf
-    {
-        return parent::topRightButtons()
-            ->add(
-                ActionButton::make('Export CSV', '/admin/resource/transaction-resource/handler/choice-export-handler?format=csv')
-            );
-    }
 }

@@ -9,9 +9,9 @@ install:
 		composer install --ignore-platform-reqs
 	$(SAIL) up -d
 	$(SAIL) artisan key:generate
-	$(SAIL) artisan migrate --seed
+	$(SAIL) artisan migrate:fresh --seed
 	$(SAIL) artisan moonshine:install -Q -u
-	$(SAIL) artisan moonshine:user --username=admin --name=admin --password=admin
+	$(SAIL) artisan moonshine:user --u=admin --N=admin --p=admin -q
 
 down:
 	$(SAIL) down

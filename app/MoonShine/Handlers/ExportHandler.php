@@ -4,29 +4,15 @@ declare(strict_types=1);
 
 namespace App\MoonShine\Handlers;
 
-use MoonShine\ImportExport\ExportHandler;
+use MoonShine\UI\Exceptions\ActionButtonException;
 use MoonShine\Contracts\UI\ActionButtonContract;
 use MoonShine\UI\Components\ActionButton;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Storage;
-use OpenSpout\Common\Exception\IOException;
-use OpenSpout\Common\Exception\InvalidArgumentException;
-use OpenSpout\Common\Exception\UnsupportedTypeException;
-use OpenSpout\Writer\Exception\WriterNotOpenedException;
-use Throwable;
-use MoonShine\UI\Exceptions\ActionButtonException;
+use Illuminate\Support\Arr;
 
-class ChoiceExportHandler extends ExportHandler
+class ExportHandler extends \MoonShine\ImportExport\ExportHandler
 {
-    protected string $format = 'xlsx';
-
-    public function format(string $format): self
-    {
-        $this->format = $format;
-        return $this;
-    }
-
     /**
      * @throws IOException
      * @throws WriterNotOpenedException
@@ -40,11 +26,11 @@ class ChoiceExportHandler extends ExportHandler
             throw ActionButtonException::resourceRequired();
         }
 
-        $this->resolveStorage();
-
-        if ($this->format === 'csv') {
+        if (request()->query('format') === 'csv') {
             $this->csv();
         }
+
+        $this->resolveStorage();
 
         $path = Storage::disk($this->getDisk())->path($this->generateFilePath());
 
@@ -60,7 +46,7 @@ class ChoiceExportHandler extends ExportHandler
             $this->getNotifyUsers(),
         );
 
-        if ($this->format === 'csv') {
+        if($this->isCsv()) {
             $this->addBomToCsv($path);
         }
 
@@ -84,6 +70,36 @@ class ChoiceExportHandler extends ExportHandler
 
     public function getButton(): ActionButtonContract
     {
-        return ActionButton::make($this->getLabel(), $this->getUrl());
+        if (! $this->hasResource()) {
+            throw ActionButtonException::resourceRequired();
+        }
+
+        $query = Arr::query(request(['filter', 'sort', 'query-tag'], []));
+        $url = $this->getUrl();
+        $originalQuery = "ts=" . time();
+
+        $originalQuery .= '&format=' . ($this->isCsv() ? 'csv' : 'xlsx');
+
+        $attributes = [
+            'class' => 'js-change-query',
+            'data-original-url' => $url,
+            'data-original-query' => $originalQuery,
+        ];
+
+        $button = ActionButton::make(
+            $this->getLabel(),
+            $url = trim("$url?$originalQuery&$query", '&')
+        )
+            ->primary()
+            ->customAttributes($attributes)
+            ->icon($this->isCsv() ? 'document-text' : 'table-cells');
+
+        if ($this->isWithConfirm()) {
+            $button->withConfirm(
+                formBuilder: static fn (FormBuilder $form): FormBuilder => $form->customAttributes($attributes)
+            );
+        }
+
+        return $this->prepareButton($button);
     }
 }
