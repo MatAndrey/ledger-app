@@ -14,6 +14,7 @@ use MoonShine\MenuManager\MenuItem;
 use App\MoonShine\Resources\Transaction\TransactionResource;
 use App\MoonShine\Resources\JournalEntry\JournalEntryResource;
 use App\MoonShine\Pages\TrialBalance;
+use App\MoonShine\Resources\User\UserResource;
 
 final class MoonShineLayout extends AppLayout
 {
@@ -32,10 +33,11 @@ final class MoonShineLayout extends AppLayout
     protected function menu(): array
     {
         return [
-            ...parent::menu(),
+            ...parent::menu(),            
+            MenuItem::make(UserResource::class, 'Пользователи'),
             MenuItem::make(AccountResource::class, 'Счета'),
             MenuItem::make(TransactionResource::class, 'Транзакции'),
-            MenuItem::make(TrialBalance::class, 'ОСВ')
+            MenuItem::make(TrialBalance::class, 'ОСВ'),
         ];
     }
 

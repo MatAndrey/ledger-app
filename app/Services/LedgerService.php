@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Repositories\LedgerRepository;
 use App\Enums\AccountTypes;
+use App\Models\Transaction;
 use Illuminate\Support\Collection;
 use Carbon\Carbon;
 
@@ -60,5 +61,10 @@ class LedgerService
         $report->push($totals);
 
         return $report;
+    }
+
+    public function createTransaction(array $data): Transaction
+    {
+        return $this->ledgerRepo->createTransaction($data);
     }
 }
