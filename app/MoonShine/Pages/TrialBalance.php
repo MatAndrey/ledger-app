@@ -14,7 +14,6 @@ use MoonShine\UI\Fields\Text;
 use MoonShine\UI\Fields\Enum;
 use MoonShine\UI\Components\ActionButton;
 use App\Services\LedgerService;
-use Illuminate\Http\Request;
 use Carbon\Carbon;
 use MoonShine\Support\Enums\FormMethod;
 use App\Enums\AccountTypes;
@@ -58,14 +57,39 @@ class TrialBalance extends Page
                     FormBuilder::make()
                         ->method(FormMethod::GET)
                         ->fields([
-                            Date::make('Начало периода', 'start')
-                                ->default($start)
-                                ->required(),
-                            Date::make('Конец периода', 'end')
-                                ->default($end)
-                                ->required(),
+                            Grid::make([
+                                Column::make([
+                                    Date::make('Начало периода', 'start')
+                                        ->default($start)
+                                        ->required(),
+                                ])->columnSpan(2),
+                                Column::make([
+                                    Date::make('Конец периода', 'end')
+                                        ->default($end)
+                                        ->required(),
+                                ])->columnSpan(2),
+                            ])
                         ])
                         ->submit('Показать', ['class' => 'btn-primary'])
+                        ->buttons([
+                            ActionButton::make(
+                                'Экспорт CSV',
+                                route('admin.trial-balance.export') . '?' . http_build_query([
+                                    'format' => 'csv',
+                                    'start'  => $start,
+                                    'end'    => $end,
+                                ])
+                            )->icon('document-text'),
+
+                            ActionButton::make(
+                                'Экспорт XLSX',
+                                route('admin.trial-balance.export') . '?' . http_build_query([
+                                    'format' => 'xlsx',
+                                    'start'  => $start,
+                                    'end'    => $end,
+                                ])
+                            )->icon('table-cells'),
+                        ])
                 ])->columnSpan(12),
 
                 Column::make([
@@ -86,7 +110,7 @@ class TrialBalance extends Page
                             $table->withNotFound('Нет данных за выбранный период');
                         })
                 ])->columnSpan(12),
-            ])
+            ]),
         ];
 	}
 }

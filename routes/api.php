@@ -11,3 +11,8 @@ Route::middleware('auth.basic')->group(function () {
     Route::get('/accounts/trial-balance', [AccountController::class, 'trialBalance']);
     Route::get('/accounts/{account}/balance', [AccountController::class, 'balance']);
 });
+
+Route::middleware('moonshine')->group(function () {
+    Route::get('/trial-balance/export', [AccountController::class, 'trialBalance'])
+        ->name('admin.trial-balance.export');
+});
