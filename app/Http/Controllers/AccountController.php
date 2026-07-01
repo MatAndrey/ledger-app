@@ -7,7 +7,6 @@ use Illuminate\Http\JsonResponse;
 use App\Models\Account;
 use App\Services\LedgerService;
 use Carbon\Carbon;
-use Rap2hpoutre\FastExcel\FastExcel;
 
 
 class AccountController extends Controller
@@ -29,54 +28,16 @@ class AccountController extends Controller
     {
         $start = $request->input('start', Carbon::now()->startOfMonth()->toDateString());
         $end = $request->input('end', Carbon::now()->endOfMonth()->toDateString());
-
-        $data = $ledgerService->generateTrialBalance(Carbon::parse($start), Carbon::parse($end));
-
         $format = $request->input('format');
 
         if ($format === 'csv' || $format === 'xlsx') {
-            $rows = $data->map(function ($item) {
-                return [
-                    'Код' => $item->account->code ?? 'ИТОГО',
-                    'Счёт' => $item->account?->name ?? 'ИТОГО',
-                    'Тип' => $item->account?->type ?? '',
-                    'Начальный Дебет' => $item->opening_debit,
-                    'Начальный Кредит' => $item->opening_credit,
-                    'Оборот Дебет' => $item->debit_turnover,
-                    'Оборот Кредит' => $item->credit_turnover,
-                    'Конечный Дебет' => $item->closing_debit,
-                    'Конечный Кредит' => $item->closing_credit,
-                ];
-            })->toArray();
-
+            $path= $ledgerService->generateTrialBalanceFile($start, $end, $format);
             $filename = 'trial_balance_' . $start . '_' . $end . '.' . ($format === 'csv' ? 'csv' : 'xlsx');
-            $path = storage_path('app/public/exports/' . $filename);
-
-            if (!is_dir(dirname($path))) {
-                mkdir(dirname($path), 0755, true);
-            }
-
-            $fastExcel = new FastExcel($rows);
-            if ($format === 'csv') {
-                $fastExcel->configureCsv(';');
-            }
-            $fastExcel->export($path);
-
-            $content = file_get_contents($path);
-            if ($content === false) {
-                return;
-            }
-
-            if (str_starts_with($content, "\xEF\xBB\xBF")) {
-                return;
-            }
-
-            $content = "\xEF\xBB\xBF" . $content;
-            file_put_contents($path, $content);
-
             return response()->download($path, $filename)->deleteFileAfterSend(true);
         }
 
-        return response()->json($data);
+        $report = $ledgerService->generateTrialBalance(Carbon::parse($start), Carbon::parse($end));
+
+        return response()->json($report);
     }
 }

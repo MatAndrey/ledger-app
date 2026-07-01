@@ -17,6 +17,8 @@ use App\Services\LedgerService;
 use Carbon\Carbon;
 use MoonShine\Support\Enums\FormMethod;
 use App\Enums\AccountTypes;
+use MoonShine\Support\Attributes\AsyncMethod;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 
 class TrialBalance extends Page
@@ -34,6 +36,19 @@ class TrialBalance extends Page
     public function getTitle(): string
     {
         return $this->title ?: 'Оборотно-сальдовая ведомость';
+    }
+
+    #[AsyncMethod]
+    public function export(LedgerService $ledgerService): BinaryFileResponse {
+        $start = request('start', Carbon::now()->startOfMonth()->toDateString());
+        $end = request('end', Carbon::now()->endOfMonth()->toDateString());
+        $format = request('format');
+
+        if ($format === 'csv' || $format === 'xlsx') {
+            $path = $ledgerService->generateTrialBalanceFile(Carbon::parse($start), Carbon::parse($end), $format);
+            $filename = 'trial_balance_' . $start . '_' . $end . '.' . ($format === 'csv' ? 'csv' : 'xlsx');
+            return response()->download($path, $filename)->deleteFileAfterSend(true);
+        }
     }
 
     /**
@@ -72,23 +87,22 @@ class TrialBalance extends Page
                         ])
                         ->submit('Показать', ['class' => 'btn-primary'])
                         ->buttons([
-                            ActionButton::make(
-                                'Экспорт CSV',
-                                route('admin.trial-balance.export') . '?' . http_build_query([
+                            ActionButton::make('Экспорт CSV')
+                                ->method('export', [
                                     'format' => 'csv',
-                                    'start'  => $start,
-                                    'end'    => $end,
-                                ])
-                            )->icon('document-text'),
-
-                            ActionButton::make(
-                                'Экспорт XLSX',
-                                route('admin.trial-balance.export') . '?' . http_build_query([
+                                    'start' => $start,
+                                    'end' => $end
+                                    ])
+                                ->download()
+                                ->icon('document-text'),
+                            ActionButton::make('Экспорт XLSX')
+                                ->method('export', [
                                     'format' => 'xlsx',
-                                    'start'  => $start,
-                                    'end'    => $end,
-                                ])
-                            )->icon('table-cells'),
+                                    'start' => $start,
+                                    'end' => $end
+                                    ])
+                                ->download()
+                                ->icon('table-cells'),
                         ])
                 ])->columnSpan(12),
 

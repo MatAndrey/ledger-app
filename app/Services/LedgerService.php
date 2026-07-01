@@ -7,6 +7,7 @@ use App\Enums\AccountTypes;
 use App\Models\Transaction;
 use Illuminate\Support\Collection;
 use Carbon\Carbon;
+use Rap2hpoutre\FastExcel\FastExcel;
 
 class LedgerService
 {
@@ -61,6 +62,47 @@ class LedgerService
         $report->push($totals);
 
         return $report;
+    }
+
+    public function generateTrialBalanceFile(Carbon $start, Carbon $end, string $format = 'csv'): string  {
+        if($format === 'csv' || $format === 'xlsx') {
+            $report = $this->generateTrialBalance($start, $end);
+            $rows = $report->map(function ($item) {
+                return [
+                    'Код' => $item->account->code ?? 'ИТОГО',
+                    'Счёт' => $item->account?->name ?? 'ИТОГО',
+                    'Тип' => $item->account?->type ?? '',
+                    'Начальный Дебет' => $item->opening_debit,
+                    'Начальный Кредит' => $item->opening_credit,
+                    'Оборот Дебет' => $item->debit_turnover,
+                    'Оборот Кредит' => $item->credit_turnover,
+                    'Конечный Дебет' => $item->closing_debit,
+                    'Конечный Кредит' => $item->closing_credit,
+                ];
+            })->toArray();
+
+            $filename = 'trial_balance_' . $start . '_' . $end . '.' . ($format === 'csv' ? 'csv' : 'xlsx');
+            $path = storage_path('app/public/exports/' . $filename);
+
+            if (!is_dir(dirname($path))) {
+                mkdir(dirname($path), 0755, true);
+            }
+
+            $fastExcel = new FastExcel($rows);
+            if ($format === 'csv') {
+                $fastExcel->configureCsv(';');
+            }
+            $fastExcel->export($path);
+
+            if ($format === 'csv') {
+                $content = file_get_contents($path);
+                $content = "\xEF\xBB\xBF" . $content;
+                file_put_contents($path, $content);
+            }            
+
+            return $path;
+        }
+        return '';
     }
 
     public function createTransaction(array $data): Transaction
