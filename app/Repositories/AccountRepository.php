@@ -38,7 +38,7 @@ class AccountRepository
             ->get();
     }
 
-    public function getJournalEntriesSum(Account $account, ?string $type = '', ?Carbon $asOf) {
+    public function getJournalEntriesSum(Account $account, ?string $type = '', ?Carbon $asOf): int {
         $query = $account->journalEntries();
         if ($asOf) {
             $query->whereHas('transaction', fn($q) => $q->where('date', '<=', $asOf));
@@ -49,5 +49,26 @@ class AccountRepository
         }
 
         return $query->sum('amount');
+    }
+
+    public function getByCode(int $code): ?Account {
+        return Account::where('code', $code)->first();
+    }
+
+    public function store($data): Account {
+        return Account::create($data);
+    }
+
+    public function destroy(Account $account) {
+        $account->delete();
+    }
+
+    public function update(Account $account, array $data)  {
+        $account->name = $data['name'];
+        $account->code = $data['code'];
+        $account->type = $data['type'];
+        $account->is_active = $data['is_active'];
+        $account->save();
+        return $account;
     }
 }

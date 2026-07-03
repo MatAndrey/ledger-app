@@ -102,6 +102,136 @@ class AccountApiTest extends TestCase
         $this->assertEquals(200, $total['opening_debit']);
     }
 
+    #[Test]
+    public function it_can_create_an_account()
+    {
+        $payload = [
+            'name' => 'Test Account',
+            'code' => 100,
+            'type' => 'asset',
+            'is_active' => true,
+        ];
+
+        $response = $this->withHeader('Authorization', 'Basic ' . $this->auth)
+            ->postJson('/api/accounts', $payload);
+
+        $response->assertStatus(201);
+        $this->assertDatabaseHas('accounts', [
+            'name' => 'Test Account',
+            'code' => 100,
+            'type' => 'asset',
+            'is_active' => true,
+        ]);
+    }
+
+    #[Test]
+    public function it_can_view_an_account()
+    {
+        $account = Account::factory()->create();
+
+        $response = $this->withHeader('Authorization', 'Basic ' . $this->auth)
+            ->getJson("/api/accounts/{$account->id}");
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'id' => $account->id,
+            'name' => $account->name,
+            'code' => $account->code,
+            'type' => $account->type->value,
+            'is_active' => $account->is_active,
+        ]);
+    }
+
+    #[Test]
+    public function it_can_update_an_account()
+    {
+        $account = Account::factory()->create();
+
+        $payload = [
+            'name' => 'Updated Account',
+            'code' => 200,
+            'type' => 'liability',
+            'is_active' => false,
+        ];
+
+        $response = $this->withHeader('Authorization', 'Basic ' . $this->auth)
+            ->putJson("/api/accounts/{$account->id}", $payload);
+
+        $response->assertStatus(200);
+        $this->assertDatabaseHas('accounts', [
+            'id' => $account->id,
+            'name' => 'Updated Account',
+            'code' => 200,
+            'type' => 'liability',
+            'is_active' => false,
+        ]);
+    }
+
+    #[Test]
+    public function it_can_delete_an_account()
+    {
+        $account = Account::factory()->create();
+
+        $response = $this->withHeader('Authorization', 'Basic ' . $this->auth)
+            ->deleteJson("/api/accounts/{$account->id}");
+
+        $response->assertStatus(204);
+        $this->assertDatabaseMissing('accounts', ['id' => $account->id]);
+    }
+
+    #[Test]
+    public function it_returns_404_when_account_not_found()
+    {
+        $response = $this->withHeader('Authorization', 'Basic ' . $this->auth)
+            ->getJson('/api/accounts/999');
+
+        $response->assertStatus(404);
+    }
+
+    #[Test]
+    public function it_validates_required_fields_when_creating_account()
+    {
+        $response = $this->withHeader('Authorization', 'Basic ' . $this->auth)
+            ->postJson('/api/accounts', []);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['name', 'code', 'type']);
+    }
+
+    #[Test]
+    public function it_validates_unique_code_when_creating_account()
+    {
+        Account::factory()->create(['code' => 100]);
+
+        $payload = [
+            'name' => 'Duplicate Code',
+            'code' => 100,
+            'type' => 'asset',
+        ];
+
+        $response = $this->withHeader('Authorization', 'Basic ' . $this->auth)
+            ->postJson('/api/accounts', $payload);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['code']);
+    }
+
+    #[Test]
+    public function it_validates_type_enum_when_creating_account()
+    {
+        $payload = [
+            'name' => 'Invalid Type',
+            'code' => 101,
+            'type' => 'invalid',
+        ];
+
+        $response = $this->withHeader('Authorization', 'Basic ' . $this->auth)
+            ->postJson('/api/accounts', $payload);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['type']);
+    }
+
     protected function createJournalEntries(Account $account, float $debit, float $credit, ?Carbon $date = null)
     {
         $date = $date ?? Carbon::now();

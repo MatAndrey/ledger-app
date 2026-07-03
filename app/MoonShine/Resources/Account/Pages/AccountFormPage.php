@@ -58,7 +58,7 @@ class AccountFormPage extends FormPage
         $accountId = $item->id ?? null;
 
         return [
-            'name' => ['required', 'string', 'max:255'],
+            'name' => ['required', 'string', 'max:100'],
             'code' => [
                 'required',
                 'integer',

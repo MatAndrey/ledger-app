@@ -10,6 +10,7 @@ use App\Repositories\JournalEntryRepository;
 use App\Enums\AccountTypes;
 use App\Models\Account;
 use Rap2hpoutre\FastExcel\FastExcel;
+use Illuminate\Validation\ValidationException;
 
 class AccountService
 {
@@ -117,5 +118,25 @@ class AccountService
         }            
 
         return $path;
+    }
+
+    public function createAccount(array $requestData): Account {
+        $existing = $this->accountRepository->getByCode($requestData['code']);
+        if($existing) {
+            throw ValidationException::withMessages(["Аккаунт с кодом {$existing['code']} уже существует"]);
+        }
+        return $this->accountRepository->store($requestData);
+    }
+
+    public function getAll(): Collection {
+        return $this->accountRepository->getAll();
+    }
+
+    public function destroyAccount(Account $account) {
+        $this->accountRepository->destroy($account);
+    }
+
+    public function updateAccount(Account $account, array $requestData)  {
+        return $this->accountRepository->update($account, $requestData);
     }
 }

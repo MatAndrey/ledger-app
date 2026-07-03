@@ -17,7 +17,7 @@ class TransactionService
         $totalDebit = collect($data['journalEntries'])->where('type', 'debit')->sum('amount');
         $totalCredit = collect($data['journalEntries'])->where('type', 'credit')->sum('amount');
         if (abs($totalDebit - $totalCredit) > 0.01) {
-            throw new ValidationException("Сумма дебета ($totalDebit) должна равняться сумме кредита ($totalCredit)");
+            throw ValidationException::withMessages(["Сумма дебета ($totalDebit) должна равняться сумме кредита ($totalCredit)"]);
         }
         return $this->transactionRepository->createTransaction($data);
     }
