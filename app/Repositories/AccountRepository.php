@@ -9,7 +9,7 @@ use Carbon\Carbon;
 
 class AccountRepository
 {
-public function getAll(): Collection
+    public function getAll(): Collection
     {
         return Account::orderBy('code')->get();
     }

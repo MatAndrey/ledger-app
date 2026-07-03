@@ -24,7 +24,8 @@ class AccountService
             $debitSum = $this->accountRepository->getJournalEntriesSum($account, 'debit', $asOf);
             $creditSum = $this->accountRepository->getJournalEntriesSum($account, 'credit', $asOf);
 
-            if ($account->type == AccountTypes::Asset || $account->type == AccountTypes::Expense) {
+            $type = $account->type instanceof AccountTypes ? $account->type->value : $account->type;
+            if (in_array($type, ['asset', 'expense'])) {
                 return $debitSum - $creditSum;
             }
             return $creditSum - $debitSum;

@@ -7,6 +7,7 @@ use App\Models\JournalEntry;
 use App\Models\Transaction;
 use App\Services\AccountService;
 use App\Enums\AccountTypes;
+use App\Enums\JournalEntryTypes;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
@@ -110,7 +111,7 @@ class AccountServiceTest extends TestCase
                 'transaction_id' => $transaction->id,
                 'account_id' => $account->id,
                 'amount' => $debit,
-                'type' => 'debit',
+                'type' => JournalEntryTypes::Debit,
             ]);
         }
         if ($credit > 0) {
@@ -118,7 +119,7 @@ class AccountServiceTest extends TestCase
                 'transaction_id' => $transaction->id,
                 'account_id' => $account->id,
                 'amount' => $credit,
-                'type' => 'credit',
+                'type' => JournalEntryTypes::Credit,
             ]);
         }
         return $transaction;
