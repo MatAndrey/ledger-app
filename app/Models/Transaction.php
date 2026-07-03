@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Cast;
 use Illuminate\Database\Eloquent\Attributes\WithoutTimestamps;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Enums\JournalEntryTypes;
@@ -16,6 +17,8 @@ use App\Enums\JournalEntryTypes;
 #[WithoutTimestamps]
 class Transaction extends Model
 {
+    use HasFactory;
+
     public function journalEntries(): HasMany
     {
         return $this->hasMany(JournalEntry::class);

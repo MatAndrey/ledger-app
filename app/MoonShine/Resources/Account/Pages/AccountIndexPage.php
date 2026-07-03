@@ -12,6 +12,7 @@ use MoonShine\Laravel\QueryTags\QueryTag;
 use MoonShine\UI\Components\Metrics\Wrapped\Metric;
 use MoonShine\UI\Fields\ID;
 use App\MoonShine\Resources\Account\AccountResource;
+use App\Services\AccountService;
 use MoonShine\Support\ListOf;
 use MoonShine\UI\Fields\Text;
 use MoonShine\UI\Fields\Number;
@@ -33,12 +34,16 @@ class AccountIndexPage extends IndexPage
      */
     protected function fields(): iterable
     {
+        $service = app(AccountService::class);
+
         return [
             ID::make()->sortable(),
             Text::make('Название', 'name')->sortable(),
             Number::make('Код', 'code')->sortable(),
             Enum::make('Тип', 'type')->attach(AccountTypes::class)->sortable(),
-            Text::make('Остаток', 'balance'),
+            Text::make('Остаток')->changeFill(function($item) use($service) {
+                return $service->getBalance($item);
+            }),
             Checkbox::make('Активен', 'is_active')->sortable(),
         ];
     }

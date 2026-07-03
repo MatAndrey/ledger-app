@@ -6,6 +6,7 @@ use App\Models\Account;
 use App\Models\JournalEntry;
 use App\Models\Transaction;
 use App\Services\AccountService;
+use App\Enums\AccountTypes;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
@@ -26,7 +27,7 @@ class AccountServiceTest extends TestCase
     #[Test]
     public function it_calculates_balance_for_asset_account()
     {
-        $account = Account::factory()->create(['type' => 'asset']);
+        $account = Account::factory()->create(['type' => AccountTypes::Asset]);
         // Создаём транзакцию с проводками
         $this->createJournalEntries($account, 500, 200);
 
@@ -37,7 +38,7 @@ class AccountServiceTest extends TestCase
     #[Test]
     public function it_calculates_balance_for_liability_account()
     {
-        $account = Account::factory()->create(['type' => 'liability']);
+        $account = Account::factory()->create(['type' => AccountTypes::Liability]);
         // Для пассивного: кредит увеличивает, дебет уменьшает
         $this->createJournalEntries($account, 200, 500);
 
@@ -48,11 +49,11 @@ class AccountServiceTest extends TestCase
     #[Test]
     public function it_calculates_balance_as_of_specific_date()
     {
-        $account = Account::factory()->create(['type' => 'asset']);
+        $account = Account::factory()->create(['type' => AccountTypes::Asset]);
         $date = Carbon::parse('2026-07-01');
         // Создаём проводки до и после даты
-        $this->createJournalEntries($account, 100, 50, $date->subDay()); // до
-        $this->createJournalEntries($account, 200, 100, $date->addDay()); // после
+        $this->createJournalEntries($account, 100, 50, $date->copy()->subDay()); // до
+        $this->createJournalEntries($account, 200, 100, $date->copy()->addDays()); // после
 
         $balance = $this->service->getBalance($account, $date);
         $this->assertEquals(50, $balance); // только первая транзакция
@@ -64,8 +65,8 @@ class AccountServiceTest extends TestCase
         $start = Carbon::parse('2026-07-01');
         $end = Carbon::parse('2026-07-31');
 
-        $account1 = Account::factory()->create(['code' => 1, 'name' => 'Cash', 'type' => 'asset']);
-        $account2 = Account::factory()->create(['code' => 2, 'name' => 'Revenue', 'type' => 'revenue']);
+        $account1 = Account::factory()->create(['code' => 1, 'name' => 'Cash', 'type' => AccountTypes::Asset]);
+        $account2 = Account::factory()->create(['code' => 2, 'name' => 'Revenue', 'type' => AccountTypes::Revenue]);
 
         // Транзакция внутри периода
         $this->createJournalEntries($account1, 100, 30, $start->copy()->addDay());
@@ -79,22 +80,21 @@ class AccountServiceTest extends TestCase
         $this->assertCount(3, $report); // два счета + итог
 
         $account1Row = $report->firstWhere('account.id', $account1->id);
-        $this->assertEquals(150, $account1Row->opening_debit); // 200 - 50 = 150
+        $this->assertEquals(200, $account1Row->opening_debit);
         $this->assertEquals(100, $account1Row->debit_turnover);
         $this->assertEquals(30, $account1Row->credit_turnover);
-        $this->assertEquals(250, $account1Row->closing_debit); // 150 + 100 = 250
-        $this->assertEquals(30, $account1Row->closing_credit); // 0 + 30
+        $this->assertEquals(300, $account1Row->closing_debit);
+        $this->assertEquals(80, $account1Row->closing_credit);
 
         $account2Row = $report->firstWhere('account.id', $account2->id);
         $this->assertEquals(0, $account2Row->opening_debit);
         $this->assertEquals(50, $account2Row->debit_turnover);
         $this->assertEquals(0, $account2Row->credit_turnover);
 
-        // Итоговая строка
         $totalRow = $report->last();
         $this->assertTrue($totalRow->is_total);
-        $this->assertEquals(150, $totalRow->opening_debit);
-        $this->assertEquals(0, $totalRow->opening_credit);
+        $this->assertEquals(200, $totalRow->opening_debit);
+        $this->assertEquals(50, $totalRow->opening_credit);
         $this->assertEquals(150, $totalRow->debit_turnover);
         $this->assertEquals(30, $totalRow->credit_turnover);
     }

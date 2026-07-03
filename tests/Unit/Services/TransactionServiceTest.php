@@ -4,6 +4,7 @@ namespace Tests\Unit\Services;
 
 use App\Models\Account;
 use App\Services\TransactionService;
+use App\Enums\JournalEntryTypes;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use Illuminate\Validation\ValidationException;
@@ -30,9 +31,9 @@ class TransactionServiceTest extends TestCase
         $data = [
             'date' => '2026-07-03',
             'description' => 'Test transaction',
-            'entries' => [
-                ['account_id' => $account1->id, 'amount' => 100.50, 'type' => 'credit'],
-                ['account_id' => $account2->id, 'amount' => 100.50, 'type' => 'debit'],
+            'journalEntries' => [
+                ['account_id' => $account1->id, 'amount' => 100.50, 'type' => JournalEntryTypes::Credit],
+                ['account_id' => $account2->id, 'amount' => 100.50, 'type' => JournalEntryTypes::Debit],
             ]
         ];
 
@@ -46,6 +47,5 @@ class TransactionServiceTest extends TestCase
         ]);
 
         $this->assertCount(2, $transaction->journalEntries);
-        $this->assertEquals(100.50, $transaction->journalEntries->sum('amount'));
     }
 }

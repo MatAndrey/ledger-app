@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Models\Account;
-use App\Services\LedgerService;
+use App\Services\AccountService;
 use Carbon\Carbon;
 use Illuminate\Validation\ValidationException;
 
@@ -17,8 +17,10 @@ class AccountController extends Controller
     }
 
     /** @throws \Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException */
-    public function balance(Account $account, Request $request): JsonResponse {
-        $balance = $account->balance;
+    public function balance(AccountService $accountService, Account $account, Request $request): JsonResponse {
+        $validated = $request->validate(['asOf'  => 'nullable|date']);
+        $asOf = isset($validated['asOf']) ? Carbon::parse($validated['asOf']) : null;
+        $balance = $accountService->getBalance($account, $asOf);
 
         return response()->json([
             'account_id' => $account->id,
@@ -27,7 +29,7 @@ class AccountController extends Controller
     }
 
     /** @throws \Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException */
-    public function trialBalance(LedgerService $ledgerService, Request $request)
+    public function trialBalance(AccountService $accountService, Request $request)
     {
          $validated = $request->validate([
             'start'  => 'nullable|date',
@@ -47,7 +49,7 @@ class AccountController extends Controller
             }
         }
 
-        $report = $ledgerService->generateTrialBalance(Carbon::parse($start), Carbon::parse($end));
+        $report = $accountService->generateTrialBalance(Carbon::parse($start), Carbon::parse($end));
 
         return response()->json($report);
     }

@@ -13,7 +13,7 @@ use MoonShine\UI\Components\Table\TableBuilder;
 use MoonShine\UI\Fields\Text;
 use MoonShine\UI\Fields\Enum;
 use MoonShine\UI\Components\ActionButton;
-use App\Services\LedgerService;
+use App\Services\AccountService;
 use Carbon\Carbon;
 use MoonShine\Support\Enums\FormMethod;
 use App\Enums\AccountTypes;
@@ -39,13 +39,13 @@ class TrialBalance extends Page
     }
 
     #[AsyncMethod]
-    public function export(LedgerService $ledgerService): BinaryFileResponse {
+    public function export(AccountService $accountService): BinaryFileResponse {
         $start = request('start', Carbon::now()->startOfMonth()->toDateString());
         $end = request('end', Carbon::now()->endOfMonth()->toDateString());
         $format = request('format');
 
         if ($format === 'csv' || $format === 'xlsx') {
-            $path = $ledgerService->generateTrialBalanceFile(Carbon::parse($start), Carbon::parse($end), $format);
+            $path = $accountService->generateTrialBalanceFile(Carbon::parse($start), Carbon::parse($end), $format);
             $filename = 'trial_balance_' . $start . '_' . $end . '.' . ($format === 'csv' ? 'csv' : 'xlsx');
             return response()->download($path, $filename)->deleteFileAfterSend(true);
         }
@@ -59,7 +59,7 @@ class TrialBalance extends Page
 		$start = request('start', Carbon::now()->startOfMonth()->toDateString());
         $end   = request('end', Carbon::now()->endOfMonth()->toDateString());
 
-        $service = app(LedgerService::class);
+        $service = app(AccountService::class);
         $reportData = $service->generateTrialBalance(
             Carbon::parse($start),
             Carbon::parse($end)

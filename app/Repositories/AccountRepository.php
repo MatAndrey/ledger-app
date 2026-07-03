@@ -3,15 +3,13 @@
 namespace App\Repositories;
 
 use App\Models\Account;
-use App\Models\Transaction;
 use App\Models\JournalEntry;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
-class LedgerRepository
+class AccountRepository
 {
-    public function getAll(): Collection
+public function getAll(): Collection
     {
         return Account::orderBy('code')->get();
     }
@@ -40,25 +38,16 @@ class LedgerRepository
             ->get();
     }
 
-    public function createTransaction(array $data): Transaction
-    {
-        return DB::transaction(function () use ($data) {
-            $transaction = Transaction::create([
-                'date' => $data['date'],
-                'description' => $data['description'],
-                'created_at' => now(),
-                'is_posted' => true,
-            ]);
+    public function getJournalEntriesSum(Account $account, ?string $type = '', ?Carbon $asOf) {
+        $query = $account->journalEntries();
+        if ($asOf) {
+            $query->whereHas('transaction', fn($q) => $q->where('date', '<=', $asOf));
+        }
 
-            foreach ($data['journalEntries'] as $entry) {
-                $journalEntry = $transaction->journalEntries()->create([
-                    'account_id' => $entry['account_id'],
-                    'amount' => $entry['amount'],
-                    'type' => $entry['type'],
-                ]);
-            }
+        if($type) {
+            $query->where('type', $type);
+        }
 
-            return $transaction;
-        });
+        return $query->sum('amount');
     }
 }
