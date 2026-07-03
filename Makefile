@@ -10,8 +10,7 @@ install:
 	$(SAIL) up -d
 	$(SAIL) artisan key:generate
 	$(SAIL) artisan migrate:fresh --seed
-	$(SAIL) artisan moonshine:install -Q -u
-	$(SAIL) artisan moonshine:user --u=admin --N=admin --p=admin -q
+	$(SAIL) artisan moonshine:install -Q
 
 down:
 	$(SAIL) down

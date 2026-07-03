@@ -11,6 +11,7 @@ class TransactionController extends Controller
 {
     public function __construct(protected LedgerService $ledgerService) {}
 
+    /** @throws \Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException */
     public function store(StoreTransactionRequest $request): JsonResponse
     {
         $transaction = $this->ledgerService->createTransaction($request->validated());

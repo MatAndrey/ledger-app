@@ -7,14 +7,16 @@ use Illuminate\Http\JsonResponse;
 use App\Models\Account;
 use App\Services\LedgerService;
 use Carbon\Carbon;
-
+use Illuminate\Validation\ValidationException;
 
 class AccountController extends Controller
 {
+    /** @throws \Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException */
     public function index(): JsonResponse {
         return response()->json(Account::all());
     }
 
+    /** @throws \Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException */
     public function balance(Account $account, Request $request): JsonResponse {
         $balance = $account->balance;
 
@@ -24,16 +26,25 @@ class AccountController extends Controller
         ]);
     }
 
+    /** @throws \Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException */
     public function trialBalance(LedgerService $ledgerService, Request $request)
     {
-        $start = $request->input('start', Carbon::now()->startOfMonth()->toDateString());
-        $end = $request->input('end', Carbon::now()->endOfMonth()->toDateString());
-        $format = $request->input('format');
+         $validated = $request->validate([
+            'start'  => 'nullable|date',
+            'end'    => 'nullable|date'
+        ]);
 
-        if ($format === 'csv' || $format === 'xlsx') {
-            $path= $ledgerService->generateTrialBalanceFile($start, $end, $format);
-            $filename = 'trial_balance_' . $start . '_' . $end . '.' . ($format === 'csv' ? 'csv' : 'xlsx');
-            return response()->download($path, $filename)->deleteFileAfterSend(true);
+        $start = $validated['start'] ?? Carbon::now()->startOfMonth()->toDateString();
+        $end   = $validated['end'] ?? Carbon::now()->endOfMonth()->toDateString();
+
+        if (isset($validated['start']) && isset($validated['end'])) {
+            $startCarbon = Carbon::parse($start);
+            $endCarbon = Carbon::parse($end);
+            if ($startCarbon->greaterThan($endCarbon)) {
+                throw ValidationException::withMessages([
+                    'end' => 'Дата окончания периода должна быть позже или равна дате начала.',
+                ]);
+            }
         }
 
         $report = $ledgerService->generateTrialBalance(Carbon::parse($start), Carbon::parse($end));
