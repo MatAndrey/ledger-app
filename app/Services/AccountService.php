@@ -128,7 +128,7 @@ class AccountService
         return $this->accountRepository->store($requestData);
     }
 
-    public function getAll(): Collection {
+    public function getAllAccounts(): Collection {
         return $this->accountRepository->getAll();
     }
 

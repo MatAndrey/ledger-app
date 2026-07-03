@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 use App\Models\Account;
 use App\Services\AccountService;
 use App\Http\Requests\StoreAccountRequest;
@@ -16,7 +17,7 @@ class AccountController extends Controller
 
     /** @throws \Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException */
     public function index(): JsonResponse {
-        $accounts = $this->accountService->getAll();
+        $accounts = $this->accountService->getAllAccounts();
         return response()->json($accounts);
     }
 
@@ -73,14 +74,13 @@ class AccountController extends Controller
     }
 
     /** @throws \Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException */
-    public function destroy(Account $account)  {
+    public function destroy(Account $account): Response {
         $account = $this->accountService->destroyAccount($account);
         return response(null, 204);
     }
 
     /** @throws \Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException */
-    public function update(Account $account, StoreAccountRequest $request)  {
-
+    public function update(Account $account, StoreAccountRequest $request): JsonResponse  {
         $account = $this->accountService->updateAccount($account, $request->validated());
         return response()->json($account, 200);
     }

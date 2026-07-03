@@ -10,6 +10,7 @@ use App\Enums\AccountTypes;
 use App\Enums\JournalEntryTypes;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Validation\ValidationException;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
@@ -123,5 +124,79 @@ class AccountServiceTest extends TestCase
             ]);
         }
         return $transaction;
+    }
+
+    #[Test]
+    public function it_creates_account_successfully()
+    {
+        $data = [
+            'name' => 'New Account',
+            'code' => 123,
+            'type' => 'asset',
+            'is_active' => true,
+        ];
+
+        $account = $this->service->createAccount($data);
+
+        $this->assertDatabaseHas('accounts', [
+            'id' => $account->id,
+            'name' => 'New Account',
+            'code' => 123,
+            'type' => 'asset',
+            'is_active' => true,
+        ]);
+    }
+
+    #[Test]
+    public function it_throws_exception_when_creating_account_with_duplicate_code()
+    {
+        $existing = Account::factory()->create(['code' => 100]);
+
+        $this->expectException(ValidationException::class);
+        $this->expectExceptionMessage('Аккаунт с кодом 100 уже существует');
+
+        $this->service->createAccount([
+            'name' => 'Duplicate',
+            'code' => 100,
+            'type' => 'asset',
+        ]);
+    }
+
+    #[Test]
+    public function it_updates_account_successfully()
+    {
+        $account = Account::factory()->create(['code' => 10, 'name' => 'Old Name']);
+
+        $updated = $this->service->updateAccount($account, [
+            'name' => 'New Name',
+            'code' => 20,
+            'type' => 'liability',
+            'is_active' => false,
+        ]);
+
+        $this->assertEquals('New Name', $updated->name);
+        $this->assertEquals(20, $updated->code);
+        $this->assertEquals('liability', $updated->type);
+        $this->assertFalse($updated->is_active);
+    }
+
+    #[Test]
+    public function it_deletes_account()
+    {
+        $account = Account::factory()->create();
+
+        $this->service->destroyAccount($account);
+
+        $this->assertDatabaseMissing('accounts', ['id' => $account->id]);
+    }
+
+    #[Test]
+    public function it_gets_all_accounts()
+    {
+        Account::factory()->count(3)->create();
+
+        $accounts = $this->service->getAllAccounts();
+
+        $this->assertCount(3, $accounts);
     }
 }

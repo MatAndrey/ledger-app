@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use App\Models\Account;
+use App\Models\Transaction;
 
 class StoreTransactionRequest extends FormRequest
 {
@@ -24,6 +25,7 @@ class StoreTransactionRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'is_posted' => ['required', 'boolean'],
             'date' => ['required', 'date'],
             'description' => ['nullable', 'string', 'max:1000'],
             'journalEntries' => ['required', 'array', 'min:2', function (string $attribute, mixed $value, \Closure $fail) {
