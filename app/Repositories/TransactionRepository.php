@@ -29,7 +29,7 @@ class TransactionRepository
         });
     }
 
-    public function update(Transaction $transaction, $data): Transaction {
+    public function update(Transaction $transaction, array $data): Transaction {
         return DB::transaction(function () use ($transaction, $data) {
             $transaction->date = $data['date'];
             $transaction->description = $data['description'];

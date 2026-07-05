@@ -25,7 +25,7 @@ class AccountRepository
             ->get();
     }
 
-    public function getJournalEntriesSum(Account $account, ?string $type = '', ?Carbon $asOf): int {
+    public function getJournalEntriesSum(Account $account, ?string $type = null, ?Carbon $asOf): int {
         $query = $account->journalEntries();
         if ($asOf) {
             $query->whereHas('transaction', fn($q) => $q->where('date', '<=', $asOf));
