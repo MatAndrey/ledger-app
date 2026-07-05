@@ -6,8 +6,12 @@ namespace App\MoonShine\Pages;
 
 use MoonShine\Laravel\Pages\Page;
 use MoonShine\Contracts\UI\ComponentContract;
-#[\MoonShine\MenuManager\Attributes\SkipMenu]
+use MoonShine\UI\Components\Metrics\Wrapped\ValueMetric;
+use MoonShine\UI\Components\Layout\Grid;
+use App\Models\Account;
+use App\Models\Transaction;
 
+#[\MoonShine\MenuManager\Attributes\SkipMenu]
 class Dashboard extends Page
 {
     /**
@@ -30,6 +34,15 @@ class Dashboard extends Page
      */
     protected function components(): iterable
 	{
-		return [];
+		return [
+            Grid::make([
+                ValueMetric::make('Всего счетов')
+                    ->value(Account::count())
+                    ->columnSpan(6),
+                ValueMetric::make('Всего транзакций')
+                    ->value(Transaction::count())
+                    ->columnSpan(6)
+            ])            
+        ];
 	}
 }

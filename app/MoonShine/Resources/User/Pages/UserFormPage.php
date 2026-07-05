@@ -16,6 +16,7 @@ use MoonShine\UI\Fields\Email;
 use MoonShine\UI\Fields\Text;
 use MoonShine\UI\Fields\Password;
 use MoonShine\UI\Components\Layout\Box;
+use Illuminate\Validation\Rule; 
 use Throwable;
 
 
@@ -48,9 +49,11 @@ class UserFormPage extends FormPage
 
     protected function rules(DataWrapperContract $item): array
     {
+        $userId = $item->id ?? null;
+
         return [
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
+            'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($userId)],
             'password' => 'required|min:8'
         ];
     }
