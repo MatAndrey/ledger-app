@@ -33,4 +33,9 @@ class UserResource extends ModelResource
             UserDetailPage::class,
         ];
     }
+
+    protected function search(): array
+    {
+        return ['name', 'email'];
+    }
 }

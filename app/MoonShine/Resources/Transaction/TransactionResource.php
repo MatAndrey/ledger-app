@@ -76,4 +76,9 @@ class TransactionResource extends ModelResource implements HasImportExportContra
             $this->exportCSV(),
         ]));
     }
+
+    protected function search(): array
+    {
+        return ['description'];
+    }
 }

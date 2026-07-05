@@ -61,7 +61,12 @@ class AccountIndexPage extends IndexPage
      */
     protected function filters(): iterable
     {
-        return [];
+        return [
+            Enum::make('Тип', 'type')
+                ->attach(AccountTypes::class)
+                ->nullable()
+                ->multiple(),
+        ];
     }
 
     /**

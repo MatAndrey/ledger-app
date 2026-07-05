@@ -87,4 +87,9 @@ class AccountResource extends ModelResource implements HasImportExportContract
             $this->exportCSV(),
         ]));
     }
+
+    protected function search(): array
+    {
+        return ['name', 'code', 'type'];
+    }
 }

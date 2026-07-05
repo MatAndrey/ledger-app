@@ -33,7 +33,7 @@ class UserFormPage extends FormPage
         return [
             Text::make('Имя', 'name')->required(),
             Email::make('Email', 'email')->required(),
-            Password::make('Пароль', 'password')->required()
+            Password::make('Пароль', 'password')->required()->eye()
         ];
     }
 
