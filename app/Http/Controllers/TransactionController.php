@@ -26,7 +26,7 @@ class TransactionController extends Controller
 
     /** @throws \Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException */
     public function show(Transaction $transaction): JsonResponse  {
-        return response()->json($transaction, 200);
+        return response()->json($transaction->load('journalEntries'), 200);
     }
 
     /** @throws \Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException */
@@ -47,7 +47,7 @@ class TransactionController extends Controller
     }
 
     /** @throws \Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException */
-    public function destroy(Transaction $transaction): Response  {
+    public function destroy(Transaction $transaction): Response | JsonResponse  {
         if($transaction->is_posted) {
             return response()->json([
                 'message' => 'Cannot delete posted transaction'

@@ -50,7 +50,8 @@ return [
         /*
          * Description rendered on the home page of the API documentation (`/docs/api`).
          */
-        'description' => 'Документация к API системы бухгалтерского учёта',
+        'description' => 
+            'Документация к API системы бухгалтерского учёта. Используется базовая аутентификация. Учётные данные выдаются администратором.',
     ],
 
     'ui' => [

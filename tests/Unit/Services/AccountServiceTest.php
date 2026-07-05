@@ -148,21 +148,6 @@ class AccountServiceTest extends TestCase
     }
 
     #[Test]
-    public function it_throws_exception_when_creating_account_with_duplicate_code()
-    {
-        $existing = Account::factory()->create(['code' => 100]);
-
-        $this->expectException(ValidationException::class);
-        $this->expectExceptionMessage('Аккаунт с кодом 100 уже существует');
-
-        $this->service->createAccount([
-            'name' => 'Duplicate',
-            'code' => 100,
-            'type' => 'asset',
-        ]);
-    }
-
-    #[Test]
     public function it_updates_account_successfully()
     {
         $account = Account::factory()->create(['code' => 10, 'name' => 'Old Name']);

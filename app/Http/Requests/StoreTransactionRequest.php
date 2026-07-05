@@ -28,7 +28,7 @@ class StoreTransactionRequest extends FormRequest
             'is_posted' => ['required', 'boolean'],
             'date' => ['required', 'date'],
             'description' => ['nullable', 'string', 'max:1000'],
-            'journalEntries' => ['required', 'array', 'min:2', function (string $attribute, mixed $value, \Closure $fail) {
+            'journal_entries' => ['required', 'array', 'min:2', function (string $attribute, mixed $value, \Closure $fail) {
                 $totalDebit = 0;
                 $totalCredit = 0;
                 foreach($value as $entry) {
@@ -39,11 +39,18 @@ class StoreTransactionRequest extends FormRequest
                 if(abs($totalCredit - $totalDebit) > 0.0001) {
                     $fail("Сумма дебета ($totalDebit) должна равняться сумме кредита ($totalCredit)");
                 }
+
+                $accountIds = collect($value)->pluck('account_id');
+                if ($accountIds->count() !== $accountIds->unique()->count()) {
+                    $fail('В одной транзакции не может быть две проводки с одним и тем же счётом.');
+                }
             }],
-            'journalEntries.*.type' => ['required', 'in:debit,credit'],
-            'journalEntries.*.amount' => ['required', 'numeric', 'min:0.01'],
-            'journalEntries.*.account_id' => [
+            'journal_entries.*.type' => ['required', 'in:debit,credit'],
+            'journal_entries.*.amount' => ['required', 'numeric', 'min:0.01'],
+            'journal_entries.*.account_id' => [
                 'required',
+                'numeric',
+                'min:1',
                 function (string $attribute, mixed $value, \Closure $fail) {
                     $account = Account::find($value);
                     if (!$account || !$account->is_active) {

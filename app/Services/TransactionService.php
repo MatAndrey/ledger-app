@@ -15,8 +15,8 @@ class TransactionService
 
     public function createTransaction(array $data): Transaction
     {
-        $totalDebit = collect($data['journalEntries'])->where('type', 'debit')->sum('amount');
-        $totalCredit = collect($data['journalEntries'])->where('type', 'credit')->sum('amount');
+        $totalDebit = collect($data['journal_entries'])->where('type', 'debit')->sum('amount');
+        $totalCredit = collect($data['journal_entries'])->where('type', 'credit')->sum('amount');
         if (abs($totalDebit - $totalCredit) > 0.01) {
             throw ValidationException::withMessages(["Сумма дебета ($totalDebit) должна равняться сумме кредита ($totalCredit)"]);
         }
@@ -24,8 +24,8 @@ class TransactionService
     }
 
     public function updateTransaction(Transaction $transaction, $requestData): Transaction {
-        $totalDebit = collect($requestData['journalEntries'])->where('type', 'debit')->sum('amount');
-        $totalCredit = collect($requestData['journalEntries'])->where('type', 'credit')->sum('amount');
+        $totalDebit = collect($requestData['journal_entries'])->where('type', 'debit')->sum('amount');
+        $totalCredit = collect($requestData['journal_entries'])->where('type', 'credit')->sum('amount');
         if (abs($totalDebit - $totalCredit) > 0.01) {
             throw ValidationException::withMessages(["Сумма дебета ($totalDebit) должна равняться сумме кредита ($totalCredit)"]);
         }

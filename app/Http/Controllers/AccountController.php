@@ -37,25 +37,22 @@ class AccountController extends Controller
     public function trialBalance(Request $request): JsonResponse 
     {
          $validated = $request->validate([
-            'start'  => 'nullable|date',
-            'end'    => 'nullable|date'
+            'start'  => 'required|date',
+            'end'    => 'required|date'
         ]);
 
-        $start = $validated['start'] ?? Carbon::now()->startOfMonth()->toDateString();
-        $end   = $validated['end'] ?? Carbon::now()->endOfMonth()->toDateString();
+        $start = Carbon::parse($validated['start']);
+        $end = Carbon::parse($validated['end']);
 
-        if (isset($validated['start']) && isset($validated['end'])) {
-            $startCarbon = Carbon::parse($start);
-            $endCarbon = Carbon::parse($end);
-            if ($startCarbon->greaterThan($endCarbon)) {
+        if ($start && $end) {
+            if ($start->greaterThan($end)) {
                 throw ValidationException::withMessages([
                     'end' => 'Дата окончания периода должна быть позже или равна дате начала.',
                 ]);
             }
         }
 
-        $report = $this->accountService->generateTrialBalance(Carbon::parse($start), Carbon::parse($end));
-
+        $report = $this->accountService->generateTrialBalance($start, $end);
         return response()->json($report);
     }
 

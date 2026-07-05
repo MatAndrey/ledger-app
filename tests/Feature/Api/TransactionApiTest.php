@@ -35,7 +35,7 @@ class TransactionApiTest extends TestCase
             'date' => '2026-07-03',
             'is_posted' => false,
             'description' => 'Test transaction',
-            'journalEntries' => [
+            'journal_entries' => [
                 ['account_id' => $account1->id, 'amount' => 100.50, 'type' => 'credit'],
                 ['account_id' => $account2->id, 'amount' => 100.50, 'type' => 'debit'],
             ]
@@ -59,7 +59,7 @@ class TransactionApiTest extends TestCase
         $payload = [
             'date' => '2026-07-03',
             'description' => 'Invalid',
-            'journalEntries' => [
+            'journal_entries' => [
                 ['account_id' => $account1->id, 'amount' => 100, 'type' => 'debit'],
                 ['account_id' => $account2->id, 'amount' => 50, 'type' => 'credit'],
             ]
@@ -69,7 +69,7 @@ class TransactionApiTest extends TestCase
             ->postJson('/api/transactions', $payload);
 
         $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['journalEntries']);
+        $response->assertJsonValidationErrors(['journal_entries']);
     }
 
     #[Test]
@@ -80,7 +80,7 @@ class TransactionApiTest extends TestCase
         $payload = [
             'date' => '2026-07-03',
             'description' => 'One entry',
-            'journalEntries' => [
+            'journal_entries' => [
                 ['account_id' => $account->id, 'amount' => 100, 'type' => 'debit'],
             ]
         ];
@@ -89,7 +89,7 @@ class TransactionApiTest extends TestCase
             ->postJson('/api/transactions', $payload);
 
         $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['journalEntries']);
+        $response->assertJsonValidationErrors(['journal_entries']);
     }
 
     #[Test]
@@ -100,7 +100,7 @@ class TransactionApiTest extends TestCase
         $payload = [
             'date' => '2026-07-03',
             'description' => 'Test',
-            'journalEntries' => [
+            'journal_entries' => [
                 ['account_id' => $account->id, 'amount' => 100, 'type' => 'debit'],
                 ['account_id' => $account->id, 'amount' => 100, 'type' => 'credit'],
             ]
@@ -110,7 +110,7 @@ class TransactionApiTest extends TestCase
             ->postJson('/api/transactions', $payload);
 
         $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['journalEntries.0.account_id']);
+        $response->assertJsonValidationErrors(['journal_entries.0.account_id']);
     }
 
     #[Test]
@@ -120,7 +120,7 @@ class TransactionApiTest extends TestCase
             ->postJson('/api/transactions', []);
 
         $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['date', 'journalEntries']);
+        $response->assertJsonValidationErrors(['date', 'journal_entries']);
     }
 
     #[Test]
@@ -148,15 +148,16 @@ class TransactionApiTest extends TestCase
             ->hasJournalEntries(2)
             ->create(['is_posted' => false]);
 
-        $account = Account::factory()->create();
+        $account1 = Account::factory()->create();
+        $account2 = Account::factory()->create();
 
         $payload = [
             'date' => '2026-07-03',
             'is_posted' => true,
             'description' => 'Updated description',
-            'journalEntries' => [
-                ['account_id' => $account->id, 'amount' => 200, 'type' => 'debit'],
-                ['account_id' => $account->id, 'amount' => 200, 'type' => 'credit'],
+            'journal_entries' => [
+                ['account_id' => $account1->id, 'amount' => 200, 'type' => 'debit'],
+                ['account_id' => $account2->id, 'amount' => 200, 'type' => 'credit'],
             ],
         ];
 
@@ -185,7 +186,7 @@ class TransactionApiTest extends TestCase
             'date' => '2026-07-03',
             'is_posted' => true,
             'description' => 'Should fail',
-            'journalEntries' => [
+            'journal_entries' => [
                 ['account_id' => $account1->id, 'amount' => 200, 'type' => 'debit'],
                 ['account_id' => $account2->id, 'amount' => 200, 'type' => 'credit'],
             ]
@@ -252,7 +253,7 @@ class TransactionApiTest extends TestCase
             ->putJson("/api/transactions/{$transaction->id}", $payload);
 
         $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['journalEntries']);
+        $response->assertJsonValidationErrors(['journal_entries']);
     }
 
     #[Test]

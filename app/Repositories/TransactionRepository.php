@@ -14,10 +14,10 @@ class TransactionRepository
                 'date' => $data['date'],
                 'description' => $data['description'],
                 'created_at' => now(),
-                'is_posted' => true,
+                'is_posted' => $data['is_posted'],
             ]);
 
-            foreach ($data['journalEntries'] as $entry) {
+            foreach ($data['journal_entries'] as $entry) {
                 $journalEntry = $transaction->journalEntries()->create([
                     'account_id' => $entry['account_id'],
                     'amount' => $entry['amount'],
@@ -40,7 +40,7 @@ class TransactionRepository
                 $entry->delete();
             }
 
-            foreach ($data['journalEntries'] as $entry) {
+            foreach ($data['journal_entries'] as $entry) {
                 $transaction->journalEntries()->create([
                     'account_id' => $entry['account_id'],
                     'amount' => $entry['amount'],
@@ -50,7 +50,7 @@ class TransactionRepository
 
             $transaction->save();
 
-            return $transaction->fresh();
+            return $transaction->fresh()->load('journalEntries');
         });
     }
 

@@ -30,7 +30,8 @@ class StoreAccountRequest extends FormRequest
                 'required',
                 'integer',
                 'min:1',
-                'unique:accounts,code'
+                'max:9999',
+                Rule::unique('accounts', 'code')->ignore($this->account),
             ],
             'type' => ['required', Rule::enum(AccountTypes::class)],
             'is_active' => ['boolean'],

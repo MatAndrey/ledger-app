@@ -33,6 +33,8 @@ class AccountResource extends ModelResource implements HasImportExportContract
 
     protected string $title = 'Счета';
     
+    protected bool $withPolicy = true;
+    
     /**
      * @return list<class-string<PageContract>>
      */

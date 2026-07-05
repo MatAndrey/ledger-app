@@ -52,7 +52,8 @@ class TransactionFormPage extends FormPage
                     Number::make('Сумма', 'amount')
                         ->required()
                         ->min(0)
-                        ->placeholder('0'),
+                        ->placeholder('0')
+                        ->step(0.01),
                     Enum::make('Тип', 'type')
                         ->attach(JournalEntryTypes::class)
                         ->required()

@@ -8,7 +8,7 @@ use MoonShine\Laravel\Pages\Page;
 use MoonShine\UI\Components\Layout\Grid;
 use MoonShine\UI\Components\Layout\Column;
 use MoonShine\UI\Components\FormBuilder;
-use MoonShine\UI\Fields\Date;
+use MoonShine\UI\Fields\DateRange;
 use MoonShine\UI\Components\Table\TableBuilder;
 use MoonShine\UI\Fields\Text;
 use MoonShine\UI\Fields\Enum;
@@ -56,8 +56,8 @@ class TrialBalance extends Page
      */
     protected function components(): iterable
 	{
-		$start = request('start', Carbon::now()->startOfMonth()->toDateString());
-        $end   = request('end', Carbon::now()->endOfMonth()->toDateString());
+		$start = request('date.start', Carbon::now()->startOfMonth()->toDateString());
+        $end   = request('date.end', Carbon::now()->endOfMonth()->toDateString());
 
         $service = app(AccountService::class);
         $reportData = $service->generateTrialBalance(
@@ -73,16 +73,8 @@ class TrialBalance extends Page
                         ->method(FormMethod::GET)
                         ->fields([
                             Grid::make([
-                                Column::make([
-                                    Date::make('Начало периода', 'start')
-                                        ->default($start)
-                                        ->required(),
-                                ])->columnSpan(2),
-                                Column::make([
-                                    Date::make('Конец периода', 'end')
-                                        ->default($end)
-                                        ->required(),
-                                ])->columnSpan(2),
+                                DateRange::make('Период', 'date')
+                                    ->fromTo('start', 'end')
                             ])
                         ])
                         ->submit('Показать', ['class' => 'btn-primary'])

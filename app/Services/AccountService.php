@@ -37,22 +37,21 @@ class AccountService
     {
         $accounts = $this->accountRepository->getAll();
 
-        $openingBalances = $this->accountRepository->getOpeningBalances($start)->keyBy('account_id');
-        $turnovers = $this->accountRepository->getTurnovers($start, $end)->keyBy('account_id');
+        $openingBalances = $this->accountRepository->getBalancesAt($start)->keyBy('account_id');
+        $closingBalances = $this->accountRepository->getBalancesAt($end)->keyBy('account_id');
 
         $report = collect();
 
         foreach ($accounts as $account) {
             $opening = $openingBalances->get($account->id);
-            $turnover = $turnovers->get($account->id);
+            $closing = $closingBalances->get($account->id);
 
             $openingDebit = $opening ? (float) $opening->debit_sum : 0;
             $openingCredit = $opening ? (float) $opening->credit_sum : 0;
-            $debitTurnover = $turnover ? (float) $turnover->debit_turnover : 0;
-            $creditTurnover = $turnover ? (float) $turnover->credit_turnover : 0;
-
-            $closingDebit = $openingDebit + $debitTurnover;
-            $closingCredit = $openingCredit + $creditTurnover;
+            $closingDebit = $closing ? (float) $closing->debit_sum : 0;
+            $closingCredit = $closing ? (float) $closing->credit_sum : 0;
+            $debitTurnover = round($closingDebit - $openingDebit, 2);
+            $creditTurnover = round($closingCredit - $openingCredit, 2);
 
             $report->push((object) [
                 'account' => $account,
@@ -121,10 +120,6 @@ class AccountService
     }
 
     public function createAccount(array $requestData): Account {
-        $existing = $this->accountRepository->getByCode($requestData['code']);
-        if($existing) {
-            throw ValidationException::withMessages(["Аккаунт с кодом {$existing['code']} уже существует"]);
-        }
         return $this->accountRepository->store($requestData);
     }
 

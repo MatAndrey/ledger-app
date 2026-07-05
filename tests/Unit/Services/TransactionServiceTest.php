@@ -32,10 +32,11 @@ class TransactionServiceTest extends TestCase
         $data = [
             'date' => '2026-07-03',
             'description' => 'Test transaction',
-            'journalEntries' => [
+            'journal_entries' => [
                 ['account_id' => $account1->id, 'amount' => 100.50, 'type' => JournalEntryTypes::Credit],
                 ['account_id' => $account2->id, 'amount' => 100.50, 'type' => JournalEntryTypes::Debit],
-            ]
+            ],
+            'is_posted' => true
         ];
 
         $transaction = $this->service->createTransaction($data);
@@ -63,7 +64,7 @@ class TransactionServiceTest extends TestCase
             'date' => '2026-07-04',
             'description' => 'Updated description',
             'is_posted' => true,
-            'journalEntries' => [
+            'journal_entries' => [
                 ['account_id' => $account->id, 'amount' => 150, 'type' => 'debit'],
                 ['account_id' => $account->id, 'amount' => 150, 'type' => 'credit'],
             ]
@@ -91,7 +92,7 @@ class TransactionServiceTest extends TestCase
         $this->service->updateTransaction($transaction, [
             'date' => '2026-07-04',
             'description' => 'Invalid',
-            'journalEntries' => [
+            'journal_entries' => [
                 ['account_id' => $account->id, 'amount' => 100, 'type' => 'debit'],
                 ['account_id' => $account->id, 'amount' => 50, 'type' => 'credit'],
             ]
