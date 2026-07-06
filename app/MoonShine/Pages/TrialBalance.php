@@ -72,10 +72,8 @@ class TrialBalance extends Page
                     FormBuilder::make()
                         ->method(FormMethod::GET)
                         ->fields([
-                            Grid::make([
-                                DateRange::make('Период', 'date')
-                                    ->fromTo('start', 'end')
-                            ])
+                            DateRange::make('Период', 'date')
+                                ->fromTo('start', 'end')
                         ])
                         ->submit('Показать', ['class' => 'btn-primary'])
                         ->buttons([

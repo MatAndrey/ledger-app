@@ -30,7 +30,7 @@ class Dashboard extends Page
 
     public function getTitle(): string
     {
-        return $this->title ?: 'Dashboard';
+        return $this->title ?: 'Ledger';
     }
 
     /**

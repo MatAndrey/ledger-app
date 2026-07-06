@@ -1,58 +1,132 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Ledger App —  Система учета финансовых транзакций
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Учебный проект, реализующий систему учета финансовых транзакций на основе принципов **двойной записи** (дебет/кредит). Содержит полноценную [административную панель (демо)](https://ledger.andrey-matyushin.ru/admin) на **MoonShine**, [REST API (демо)](https://ledger.andrey-matyushin.ru/docs/api) и автоматические тесты.
+ 
+## Технологический стек
 
-## About Laravel
+| Компонент | Технология |
+|-----------|------------|
+| Backend | PHP 8.5, Laravel 13 |
+| База данных | PostgreSQL 18 |
+| Админ-панель | MoonShine |
+| Документация API | Scramble (OpenAPI) |
+| Тестирование | PHPUnit |
+| Контейнеризация | Docker, Laravel Sail (для разработки) |
+| CI/CD | GitHub Actions |
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Основные возможности
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- **Управление счетами** (CRUD) — активные, пассивные, капитал, доходы, расходы.
+- **Управление транзакциями** с динамическими проводками (минимум 2 проводки, сумма дебета = кредиту).
+- **Запрет изменения/удаления** проведённых транзакций.
+- **Автоматический расчет остатков** по счету (с кэшированием).
+- **Оборотно-сальдовая ведомость** (ОСВ) за выбранный период с экспортом в CSV/XLSX.
+- **Административная панель** на MoonShine: управление счетами и транзакциями, фильтры, экспорт.
+- **REST API** с Basic-аутентификацией:
+  - Создание транзакции.
+  - Получение остатка по счету.
+  - Получение ОСВ в JSON.
+- **Юнит-тесты** (PHPUnit) на бизнес-логику и валидацию.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## Установка и запуск
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### Вариант 1: Без Sail
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+Убедитесь, что на вашем компьютере установлены **PHP 8.5+**, **Composer**, **PostgreSQL** и **Git**.
 
 ```bash
-composer require laravel/boost --dev
+# 1. Клонировать репозиторий
+git clone https://github.com/MatAndrey/ledger-app.git
+cd ledger-app
 
-php artisan boost:install
+# 2. Скопировать .env
+cp .env.example .env
+
+# 3. Настройте подключение к базе данных в файле .env
+DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_DATABASE=ledger
+DB_USERNAME=your_username
+DB_PASSWORD=your_password
+
+# 4. Установить зависимости PHP
+composer install
+
+# 5. Сгенерировать ключ приложения
+php artisan key:generate
+
+# 6. Выполнить миграции и наполнить базу тестовыми данными
+php artisan migrate:fresh --seed
+
+# 7. Запустить встроенный сервер Laravel
+php artisan serve
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+После этого приложение будет доступно по адресу http://localhost:8000.
 
-## Contributing
+Админ-панель: http://localhost:8000/admin
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Документация API (Scramble): http://localhost:8000/docs/api
 
-## Code of Conduct
+### Вариант 2: С использованием Sail
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Этот способ использует Laravel Sail — лёгкую обёртку над Docker Compose. Убедитесь, что у вас установлены Docker и Docker Compose.
 
-## Security Vulnerabilities
+```bash
+# 1. Клонировать репозиторий
+git clone https://github.com/MatAndrey/ledger-app.git
+cd ledger-app
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+# 2. Скопировать .env
+cp .env.example .env
 
-## License
+# 3. Запустите сборку и установку через Makefile
+make install
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+# Остановка контейнеров
+./vendor/bin/sail down
+```
+
+Команда make install автоматически:
+
+- Поднимет контейнеры (PHP, PostgreSQL, Nginx) через Sail.
+- Установит зависимости Composer.
+- Выполнит миграции и сидеры.
+- Сгенерирует ключ приложения.
+
+После успешного завершения приложение будет доступно по адресу http://localhost.
+
+Админ-панель: http://localhost/admin
+
+Документация API: http://localhost/docs/api
+
+### Учётные данные
+
+|| Email | Пароль |
+|-----------|------------|------------|
+| API | user@mail.ru | password |
+| MoonShine | admin@mail.ru | admin |
+
+## Тестирование
+Запуск всех тестов (Unit + Feature):
+```bash
+php artisan test
+# или
+./vendor/bin/sail artisan test
+```
+
+## API Документация
+
+Документация генерируется автоматически с помощью **Scramble** и доступна по адресу:
+
+```
+/docs/api
+```
+
+Также можно просмотреть OpenAPI-спецификацию в формате JSON:
+```
+/docs/api.json
+```
