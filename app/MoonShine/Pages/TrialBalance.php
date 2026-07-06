@@ -104,8 +104,8 @@ class TrialBalance extends Page
                             Enum::make('Тип', 'account.type')->attach(AccountTypes::class),
                             Text::make('Сальдо на начало (Дебет)', 'opening_debit'),
                             Text::make('Сальдо на начало (Кредит)', 'opening_credit'),
-                            Text::make('Оборот Дебет', 'debit_turnover'),
-                            Text::make('Оборот Кредит', 'credit_turnover'),
+                            Text::make('Оборот (Дебет)', 'debit_turnover'),
+                            Text::make('Оборот (Кредит)', 'credit_turnover'),
                             Text::make('Сальдо на конец (Дебет)', 'closing_debit'),
                             Text::make('Сальдо на конец (Кредит)', 'closing_credit'),
                         ])

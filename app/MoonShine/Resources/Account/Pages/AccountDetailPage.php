@@ -8,6 +8,7 @@ use MoonShine\Laravel\Pages\Crud\DetailPage;
 use MoonShine\Contracts\UI\ComponentContract;
 use MoonShine\UI\Components\Table\TableBuilder;
 use MoonShine\Contracts\UI\FieldContract;
+use App\Services\AccountService;
 use App\MoonShine\Resources\Account\AccountResource;
 use MoonShine\Support\ListOf;
 use MoonShine\UI\Fields\ID;
@@ -29,11 +30,16 @@ class AccountDetailPage extends DetailPage
      */
     protected function fields(): iterable
     {
+        $service = app(AccountService::class);
+
         return [
             ID::make(),
             Text::make('Название', 'name'),
             Number::make('Код', 'code'),
             Enum::make('Тип', 'type')->attach(AccountTypes::class),
+            Text::make('Остаток')->changeFill(function($item) use($service) {
+                return $service->getBalance($item);
+            }),
             Checkbox::make('Активен', 'is_active'),
         ];
     }

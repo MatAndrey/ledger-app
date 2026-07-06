@@ -85,8 +85,8 @@ class AccountService
         $report = $this->generateTrialBalance($start, $end);
         $rows = $report->map(function ($item) {
             return [
-                'Код' => $item->account->code ?? 'ИТОГО',
-                'Счёт' => $item->account?->name ?? 'ИТОГО',
+                'Код' => $item->account->code ?? '',
+                'Счёт' => $item->account?->name ?? 'Итого',
                 'Тип' => $item->account?->type ?? '',
                 'Начальный Дебет' => $item->opening_debit,
                 'Начальный Кредит' => $item->opening_credit,
